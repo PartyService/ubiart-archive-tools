@@ -71,9 +71,9 @@ def pack(target_folder, output_ipk, config_data):
                     if config_data.get('method', default_config['method']) == "lzma":
                         print(f"lzma: Compressing: {file_name}  ", end="\r")
                         file_data = lzma.compress(readedFile)
-                    else: ## Newer IPK's uses LZMA for compression, old one uses zlib, theyre both working in new versikn
+                    else: ## Newer IPK's uses LZMA for compression, old one uses zlib, theyre both working in new version
                         print(f"zlib: Compressing: {file_name}  ", end="\r")
-                        file_data = zlib.compress(readedFile)
+                        file_data = zlib.compress(readedFile, level=zlib.Z_BEST_COMPRESSION)
                     origin_size = len(readedFile)
                     compressed_size = len(file_data)
                 else:
@@ -155,7 +155,7 @@ def pack(target_folder, output_ipk, config_data):
 default_config = {
     'jdversion': 2017,
     'compress': ['.dtape.ckd', '.fx.fxb', '.m3d.ckd', '.png.ckd', '.tga.ckd'],
-    'method': 'lzma'
+    'method': 'zlib'
 }
 
 # Check if the config.json file exists

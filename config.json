@@ -7,5 +7,5 @@
         ".png.ckd",
         ".tga.ckd"
     ],
-    "method": "lzma"
+    "method": "zlib"
 }
