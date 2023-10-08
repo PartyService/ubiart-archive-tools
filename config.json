@@ -1,5 +1,8 @@
 {
-    "jdversion": 2017,
+    "version": 5,
+    "gameid": 490359856,
+    "engineversion": 253653,
+    "switchTitle": false,
     "compress": [
         ".dtape.ckd",
         ".fx.fxb",

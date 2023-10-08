@@ -15,14 +15,20 @@ This format is a custom archive file where multiple files can be packed
 - **Unpack (Extract):** Easily extract content from Ubiart archives.
 - **Pack (Create):** Create Ubiart archives with ease.
 - **Compression Support:** Compress files within the archives using zlib and LZMA.
+- **Multiple IPK Type:** This tool supports both new and old .IPK
 
 ## Compatibility
 
 Currently, Ubiart Archive Tools are compatible with the following games:
 
-- Just Dance 2015-2022
+- Raymans Origins
+- Raymans Legends
+- Just Dance 2014
+- Just Dance 2015-2022 (2017)
+- Child Of Lights
 
-Compatibility for Just Dance 2014, Rayman Origins, and another ubiart games will be added in future updates.
+Several other games can be configured manually,
+to use one of the games above, use the preconfigured ones below
 
 ## Usage
 
@@ -53,10 +59,19 @@ This project wouldn't be possible without the contributions of the following ind
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Pre-configured Games
+| Game name                 | Version | Game ID    | Engine Version | Switch Title |
+|---------------------------|---------|------------|----------------|--------------|
+| Rayman Origins (Demo)     | 3       | 2727956186 | 0              | true         |
+| Rayman Legends (Demo)     | 5       | 1274838019 | 0              | true         |
+| Just Dance 2014           | 5       | 472168730  | 0              | true         |
+| Just Dance 2017 (All)     | 5       | 490359856  | 253653         | false        |
+| Child of Light (Demo)     | 7       | 3669482532 | 30765          | false        |
 
 ## Acknowledgments
 
 - Special thanks to the contributors mentioned above for their valuable input and assistance.
 
-Feel free to contribute to this project or report any issues you encounter. Happy archiving!
+Feel free to contribute to this project or report any issues you encounter. Happy modding!

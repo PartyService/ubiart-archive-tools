@@ -3,7 +3,7 @@
 #
 # UbiArt Archive Tools (IPK) is an useful scripts to extract or pack an .ipk
 # 
-# This Script Made Possible by nicholas, just gemer, Planedec50, leamsii, ibratabian17, XpoZed
+# This Script Made Possible by Party Team, just gemer, Planedec50, leamsii, XpoZed
 #
 
 import os
@@ -24,18 +24,18 @@ STRUCT_SIGNS = {
 
 # Define a basic IPK file header
 IPK_HEADER = {
-    'magic': 1357648570,       # Decimal integer value for b'\x50\xEC\x12\xBA'
-    'version': 5,             # Decimal integer value for b'\x00\x00\x00\x05'
-    'platformsupported': 0,   # Set to 0
-    'base_offset': 0,         # Initial offset value (set to 0)
+    'magic': 1357648570,      # Decimal integer value for b'\x50\xEC\x12\xBA'
+    'version': 0,             # The Version of .ipks
+    'platformsupported': 0,   # idk what this var is for
+    'base_offset': 0,         # Initial raw file offset value (set to 0)
     'num_files': 0,           # Initialize the count of files (set to 0)
-    'compressed': 0,            # Set to 0
-    'binaryscene': 0,             # Set to 0
-    'binarylogic': 0,                # Bundlelogic maybe??
-    'datasignature': 0,              #
-    'enginesignature': 490359856,    # Let's just say this is just dance 2017
-    'engineversion': 253653,         #This is the engine version used by JD17
-    'num_files2': 0,          #idk why it's doubled?
+    'compressed': 0,          # is whole ipk compressed maybe??
+    'binaryscene': 0,         # Set to 0
+    'binarylogic': 0,         # Bundlelogic maybe??
+    'datasignature': 0,       # Maybe For crc32 checksum?
+    'enginesignature': 0,     # Game ID, to identify the games
+    'engineversion': 0,       # Engine Version Of The game
+    'num_files2': 0,          # idk why it's doubled?
 }
 
 def _exit(msg):
@@ -65,6 +65,12 @@ def pack(target_folder, output_ipk, config_data):
             if not rel_path.endswith('/'):
                 rel_path += '/'
 
+            if config_data.get('switchTitle', default_config['switchTitle']) == True:
+                tmp_path = rel_path
+                tmp_name = file_name
+                file_name = tmp_path
+                rel_path = tmp_name
+                
             with open(full_path, 'rb') as file:
                 readedFile = file.read()
                 if any(file_name.endswith(substring) for substring in config_data.get('compress', default_config['compress'])):
@@ -126,6 +132,11 @@ def pack(target_folder, output_ipk, config_data):
     # Update header information with the correct number of files
     IPK_HEADER['num_files'] = num_files
     IPK_HEADER['num_files2'] = num_files
+    # Use variables from config.json
+    IPK_HEADER['version'] = config_data.get('version', default_config['version'])
+    IPK_HEADER['enginesignature'] = config_data.get('gameid', default_config['gameid'])
+    IPK_HEADER['engineversion'] = config_data.get('engineversion', default_config['engineversion'])
+    
 
     with open(output_ipk, 'wb') as ipk_file:
         # Write the header
@@ -153,10 +164,14 @@ def pack(target_folder, output_ipk, config_data):
 
 # Get the output IPK file name
 default_config = {
-    'jdversion': 2017,
-    'compress': ['.dtape.ckd', '.fx.fxb', '.m3d.ckd', '.png.ckd', '.tga.ckd'],
+    'version': 5,
+    'gameid': 490359856,
+    'engineversion': 253653,
+    'switchTitle': False,
+    'compress': [ '.dtape.ckd', '.fx.fxb', '.m3d.ckd', '.png.ckd', '.tga.ckd' ],
     'method': 'zlib'
 }
+
 
 # Check if the config.json file exists
 config_file_path = 'config.json'

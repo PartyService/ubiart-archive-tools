@@ -3,7 +3,7 @@
 #
 # UbiArt Archive Tools (IPK) is an useful scripts to extract or pack an .ipk
 # 
-# This Script Made Possible by nicholas, just gemer, Planedec50, leamsii, ibratabian17, XpoZed
+# This Script Made Possible by Party Team, just gemer, Planedec50, leamsii, XpoZed
 #
 
 import os
@@ -114,8 +114,16 @@ def extract(target_file):
             data_size = unpack(file_chunks[k]['size']['value'])
 
             # File names and creation
-            file_path = Path.cwd() / file_chunks[k]['path_name']['value'].decode()  # utf8
-            file_name = file_chunks[k]['file_name']['value'].decode()
+            path_ori = file_chunks[k]['path_name']['value'].decode()
+            if os.path.basename(path_ori) == path_ori:
+			  # Handling ipk v3, this applies to Just Dance 2014, Raymans Origins, Etc
+              file_path = Path.cwd() / file_chunks[k]['file_name']['value'].decode() #utf8
+              file_name =  file_chunks[k]['path_name']['value'].decode() 
+            else:
+			  # Handling ipk v4?? v5+, this applies to Just Dance 2015-2022, Child Of Lights, Etc
+              print(f"A: {path_ori}")
+              file_path = Path.cwd() / file_chunks[k]['path_name']['value'].decode() #utf8
+              file_name = file_chunks[k]['file_name']['value'].decode()
 
             file.seek(offset + base_offset)
 
