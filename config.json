@@ -1,0 +1,11 @@
+{
+    "jdversion": 2017,
+    "compress": [
+        ".dtape.ckd",
+        ".fx.fxb",
+        ".m3d.ckd",
+        ".png.ckd",
+        ".tga.ckd"
+    ],
+    "method": "lzma"
+}
