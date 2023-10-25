@@ -121,7 +121,6 @@ def extract(target_file):
               file_name =  file_chunks[k]['path_name']['value'].decode() 
             else:
 			  # Handling ipk v4?? v5+, this applies to Just Dance 2015-2022, Child Of Lights, Etc
-              print(f"A: {path_ori}")
               file_path = Path.cwd() / file_chunks[k]['path_name']['value'].decode() #utf8
               file_name = file_chunks[k]['file_name']['value'].decode()
 
