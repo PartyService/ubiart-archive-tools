@@ -177,7 +177,7 @@ default_config = {
 
 
 # Check if the config.json file exists
-config_file_path = 'config.json'
+config_file_path = os.path.join( os.path.dirname( __file__ ), 'config.json')
 if not os.path.exists(config_file_path):
     print("Warning: config.json file not found. Creating a new one with default configuration.")
     config_data = default_config
