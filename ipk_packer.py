@@ -11,7 +11,7 @@ import sys
 import struct
 import zlib, lzma
 import json
-from pathlib import Path
+from pathlib import PureWindowsPath, Path
 from time import time, sleep
 
 ENDIANNESS = '>'  # Big endian
@@ -53,14 +53,17 @@ def pack(target_folder, output_ipk, config_data):
 
     for root, _, files in os.walk(target_folder):
         for file_name in files:
-            full_path = os.path.join(root, file_name)
-            rel_path = os.path.relpath(root, target_folder)  # Relative path without filename
+            full_path = os.path.normpath(os.path.join(root, file_name)) #Normalize path to avoid script bruken
+            rel_path = os.path.normpath(os.path.relpath(root, target_folder))  # Relative path without filename
             file_size = os.path.getsize(full_path)
             last_modified = int(os.path.getmtime(full_path))
 
             # If getmtime returns 0, use getctime instead
             if last_modified == 0:
                 last_modified = int(os.path.getctime(full_path))
+
+            if os.path.sep == '\\':
+                  rel_path = PureWindowsPath(rel_path).as_posix()
 
             if not rel_path.endswith('/'):
                 rel_path += '/'
@@ -79,7 +82,7 @@ def pack(target_folder, output_ipk, config_data):
                         file_data = lzma.compress(readedFile)
                     else: ## Newer IPK's uses LZMA for compression, old one uses zlib, theyre both working in new version
                         print(f"zlib: Compressing: {file_name}  ", end="\r")
-                        file_data = zlib.compress(readedFile, level=zlib.Z_BEST_COMPRESSION)
+                        file_data = zlib.compress(readedFile)
                     origin_size = len(readedFile)
                     compressed_size = len(file_data)
                 else:
@@ -101,7 +104,7 @@ def pack(target_folder, output_ipk, config_data):
                 'offset': offset,
                 'name_size': name_size,
                 'path_size': path_size,
-                'checksum': zlib.crc32(full_path.encode())
+                'checksum': zlib.crc32(f'{rel_path}{file_name}'.encode())
             })
 
             # Update offset for the next file
