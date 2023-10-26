@@ -71,7 +71,7 @@ def unpack(_bytes):
 
 
 # This function will handle the data extraction from the files
-def extract(target_file):
+def extract(target_file, output_dir=None):
     with open(target_file, 'rb') as file:
         # Get file header information
         for k, v in enumerate(IPK_HEADER):
@@ -100,9 +100,13 @@ def extract(target_file):
             file_chunks.append(fHeader)
 
         # Create the directory for the extracted folders
-        outputDir = Path(target_file.stem)
-        outputDir.mkdir(exist_ok=True)
-        os.chdir(outputDir)
+        print(output_dir)
+        if output_dir:
+           outputDir = Path(output_dir)
+           outputDir.mkdir(exist_ok=True)
+        else:
+           outputDir = Path(target_file.stem)
+           outputDir.mkdir(exist_ok=True)
 
         print(f"Log: Extracting data to {outputDir.name} in {Path.cwd()}..")
         base_offset = unpack(IPK_HEADER['base_offset']['value'])
@@ -117,11 +121,11 @@ def extract(target_file):
             path_ori = file_chunks[k]['path_name']['value'].decode()
             if os.path.basename(path_ori) == path_ori:
 			  # Handling ipk v3, this applies to Just Dance 2014, Raymans Origins, Etc
-              file_path = Path.cwd() / file_chunks[k]['file_name']['value'].decode() #utf8
+              file_path = outputDir / file_chunks[k]['file_name']['value'].decode() #utf8
               file_name =  file_chunks[k]['path_name']['value'].decode() 
             else:
 			  # Handling ipk v4?? v5+, this applies to Just Dance 2015-2022, Child Of Lights, Etc
-              file_path = Path.cwd() / file_chunks[k]['path_name']['value'].decode() #utf8
+              file_path = outputDir / file_chunks[k]['path_name']['value'].decode() #utf8
               file_name = file_chunks[k]['file_name']['value'].decode()
 
             file.seek(offset + base_offset)
@@ -155,12 +159,14 @@ def extract(target_file):
 # Check if the proper arguments were given
 args = sys.argv
 if len(args) <= 1:
-    _exit("Error: Please specify a target .IPK file to unpack! ie, ipk_unpack.py ipk_file")
+    _exit("Error: Please specify a target .IPK file to unpack! ie, ipk_unpack.py ipk_file output")
 
 # Check if the file exists
 target_file = Path(args[1])
 if not target_file.exists():
     _exit(f"Error: The file '{target_file.name}' was not found!")
 
+output_dir = None if len(args) < 3 else args[2]
+
 # Unpack the file otherwise
-extract(target_file)
+extract(target_file, output_dir)
