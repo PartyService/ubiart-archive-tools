@@ -3,16 +3,16 @@
 #
 # UbiArt Archive Tools (IPK) is an useful scripts to extract or pack an .ipk
 # 
-# This Script Made Possible by Party Team, just gemer, Planedec50, leamsii, XpoZed
+# This Script Made Possible by Party Team, just gemer, Planedec50, leamsii, XpoZed, InvoxiPlayGames
 #
 
+import numpy as np
 import os
 import sys
 import struct
-import zlib, lzma
-import json
+import zlib, lzma, re
+import json, math
 from pathlib import PureWindowsPath, Path
-from time import time, sleep
 
 ENDIANNESS = '>'  # Big endian
 STRUCT_SIGNS = {
@@ -26,7 +26,7 @@ STRUCT_SIGNS = {
 IPK_HEADER = {
     'magic': 1357648570,      # Decimal integer value for b'\x50\xEC\x12\xBA'
     'version': 0,             # The Version of .ipks
-    'platformsupported': 0,   # idk what this var is for
+    'platformsupported': 8,   # idk what this var is for
     'base_offset': 0,         # Initial raw file offset value (set to 0)
     'num_files': 0,           # Initialize the count of files (set to 0)
     'compressed': 0,          # is whole ipk compressed maybe??
@@ -38,10 +38,69 @@ IPK_HEADER = {
     'num_files2': 0,          # idk why it's doubled?
 }
 
+def shifter(a, b, c):
+    d = np.uint32(0)
+    a = np.uint32((a - b - c) ^ (c >> 0xd))
+    b = np.uint32((b - a - c) ^ (a << 0x8))
+    c = np.uint32((c - a - b) ^ (b >> 0xd))
+    a = np.uint32((a - c - b) ^ (c >> 0xc))
+    d = np.uint32((b - a - c) ^ (a << 0x10))
+    c = np.uint32((c - a - d) ^ (d >> 0x5))
+    a = np.uint32((a - c - d) ^ (c >> 0x3))
+    b = np.uint32((d - a - c) ^ (a << 0xa))
+    c = np.uint32((c - a - b) ^ (b >> 0xf))
+    return a, b, c
+
+def crc(data):
+    np.seterr(all="ignore")
+    a = np.uint32(0x9E3779B9)
+    b = np.uint32(0x9E3779B9)
+    c = np.uint32(0)
+    length = len(data)
+
+    if length > 0xc:
+        i = 0
+        while i < math.floor(length / 0xc):
+            a += np.uint32((((((data[i * 0xc + 0x3] << 8) + data[i * 0xc + 0x2]) << 8) + data[i * 0xc + 0x1]) << 8) + data[i * 0xc])
+            b += np.uint32((((((data[i * 0xc + 0x7] << 8) + data[i * 0xc + 0x6]) << 8) + data[i * 0xc + 0x5]) << 8) + data[i * 0xc + 0x4])
+            c += np.uint32((((((data[i * 0xc + 0xb] << 8) + data[i * 0xc + 0xa]) << 8) + data[i * 0xc + 0x9]) << 8) + data[i * 0xc + 0x8])
+            i += 1
+            a, b, c = shifter(a, b, c)
+
+    c += np.uint32(length)
+    i = np.uint32(length - (length % 0xc))
+
+    decide = (length % 0xc) - 1
+    if decide >= 0xa:
+        c += np.uint32(data[i + 0xa] << 0x18)
+    if decide >= 0x9:
+        c += np.uint32(data[i + 0x9] << 0x10)
+    if decide >= 0x8:
+        c += np.uint32(data[i + 0x8] << 0x8)
+    if decide >= 0x7:
+        b += np.uint32(data[i + 0x7] << 0x18)
+    if decide >= 0x6:
+        b += np.uint32(data[i + 0x6] << 0x10)
+    if decide >= 0x5:
+        b += np.uint32(data[i + 0x5] << 0x8)
+    if decide >= 0x4:
+        b += np.uint32(data[i + 0x4])
+    if decide >= 0x3:
+        a += np.uint32(data[i + 0x3] << 0x18)
+    if decide >= 0x2:
+        a += np.uint32(data[i + 0x2] << 0x10)
+    if decide >= 0x1:
+        a += np.uint32(data[i + 0x1] << 0x8)
+    if decide >= 0x0:
+        a += np.uint32(data[i + 0x0])
+
+    a, b, c = shifter(a, b, c)
+
+    return int(np.uint32(c))
+
 def _exit(msg):
     print(msg)
-    print("Exiting in 5 seconds..")
-    sleep(5)
+    print("Exiting..")
     sys.exit(-1)
 
 def pack(target_folder, output_ipk, config_data):
@@ -65,8 +124,11 @@ def pack(target_folder, output_ipk, config_data):
             if os.path.sep == '\\':
                   rel_path = PureWindowsPath(rel_path).as_posix()
 
-            if not rel_path.endswith('/'):
+            if not rel_path.endswith('/') and rel_path != '':
                 rel_path += '/'
+
+            if rel_path == './':
+                rel_path = ''
 
             if config_data.get('switchTitle', default_config['switchTitle']) == True:
                 tmp_path = rel_path
@@ -91,9 +153,14 @@ def pack(target_folder, output_ipk, config_data):
                     compressed_size = 0
                 raw_data += file_data
 
+            flags = 0
+            if file_name.endswith('.ckd'): 
+                flags = 2
             # Calculate name and path sizes
             name_size = len(file_name.encode())
             path_size = len(rel_path.encode())
+            crcpath = f'{rel_path}{file_name}'.upper()
+            stringID = crc(crcpath.encode())
 
             file_info.append({
                 'file_name': file_name.encode(),
@@ -104,8 +171,10 @@ def pack(target_folder, output_ipk, config_data):
                 'offset': offset,
                 'name_size': name_size,
                 'path_size': path_size,
-                'checksum': zlib.crc32(f'{rel_path}{file_name}'.encode())
+                'checksum': stringID,
+                'flags': flags
             })
+
 
             # Update offset for the next file
             offset += len(file_data)
@@ -158,7 +227,7 @@ def pack(target_folder, output_ipk, config_data):
             ipk_file.write(struct.pack(ENDIANNESS + STRUCT_SIGNS[4], file_data['path_size']))
             ipk_file.write(file_data['path_name'])
             ipk_file.write(struct.pack(ENDIANNESS + STRUCT_SIGNS[4], file_data['checksum']))  # checksum, set to 0
-            ipk_file.write(struct.pack(ENDIANNESS + STRUCT_SIGNS[4], 0))  # flag, set to 0
+            ipk_file.write(struct.pack(ENDIANNESS + STRUCT_SIGNS[4], file_data['flags']))  # flag, set to 0
 
         # Write the raw data at the end of the file
         ipk_file.write(raw_data)

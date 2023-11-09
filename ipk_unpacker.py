@@ -3,14 +3,13 @@
 #
 # UbiArt Archive Tools (IPK) is an useful scripts to extract or pack an .ipk
 # 
-# This Script Made Possible by Party Team, just gemer, Planedec50, leamsii, XpoZed
+# This Script Made Possible by Party Team, just gemer, Planedec50, leamsii, XpoZed, InvoxiPlayGames
 #
 
 import os
 import sys
 import struct
 from pathlib import Path
-from time import sleep
 import zlib
 import lzma
 
@@ -44,8 +43,6 @@ IPK_HEADER = {
 
 def _exit(msg):
     print(msg)
-    print("Exiting in 5 seconds..")
-    sleep(5)
     sys.exit(-1)
 
 

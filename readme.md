@@ -56,6 +56,7 @@ This project wouldn't be possible without the contributions of the following ind
 - XpoZed (unpakke)
 - planedec50
 - leamsii
+- InvoxiPlayGames
 
 ## License
 
@@ -67,7 +68,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 | Rayman Origins (Demo)     | 3       | 2727956186 | 0              | true         |
 | Rayman Legends (Demo)     | 5       | 1274838019 | 0              | true         |
 | Just Dance 2014           | 5       | 472168730  | 0              | true         |
-| Just Dance 2017 (All)     | 5       | 490359856  | 253653         | false        |
+| Just Dance 2017 (PC)      | 5       | 490359856  | 253653         | false        |
 | Child of Light (Demo)     | 7       | 3669482532 | 30765          | false        |
 
 ## Acknowledgments
